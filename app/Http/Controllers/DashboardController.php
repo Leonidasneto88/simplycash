@@ -15,19 +15,36 @@ class DashboardController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
-        // Pegamos as transações do banco através do relacionamento
-        $transactions = $user->transactions()->orderBy('date', 'desc')->get();
+        // Trazemos o relacionamento 'category' para otimizar a consulta
+        $transactions = $user->transactions()
+            ->with('category') 
+            ->orderBy('date', 'desc')
+            ->get();
 
-        // Cálculos para os cards de resumo
+        // Cálculos dos cards
         $income = $transactions->where('type', 'income')->sum('amount');
         $expense = $transactions->where('type', 'expense')->sum('amount');
         $balance = $income - $expense;
 
-        // Agrupamento para o Gráfico de Pizza (apenas despesas)
+        // GRÁFICO: Ajuste Técnico para resolver o conflito String vs Objeto
         $chartData = $transactions->where('type', 'expense')
-            ->groupBy('category')
-            ->map(fn($group) => $group->sum('amount'));
+            ->groupBy('category_id')
+            ->map(function ($group) {
+                $transaction = $group->first();
+                
+                // [FIX SENIOR] Usamos getRelation para garantir que estamos pegando o Objeto Categoria
+                // e não o texto da coluna antiga 'category' que pode existir no banco.
+                $category = $transaction->relationLoaded('category') ? $transaction->getRelation('category') : null;
 
-        return view('dashboard', compact('transactions', 'income', 'expense', 'balance', 'chartData'));
+                return [
+                    'label' => $category ? $category->name : 'Geral',
+                    'value' => (float) $group->sum('amount'),
+                    'color' => $category ? $category->color : '#10b981',
+                ];
+            })->values();
+
+        $categories = $user->categories()->orderBy('name')->get();    
+
+        return view('dashboard', compact('transactions', 'income', 'expense', 'balance', 'chartData', 'categories'));
     }
 }

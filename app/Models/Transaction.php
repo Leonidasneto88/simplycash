@@ -12,10 +12,10 @@ class Transaction extends Model
 
     protected $fillable = [
         'user_id',
+        'category_id', // Agora o banco vai reconhecer este campo
         'description',
         'amount',
         'type',
-        'category',
         'date',
     ];
 
@@ -25,5 +25,13 @@ class Transaction extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Relacionamento: Uma transação pertence a uma categoria.
+     */
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
     }
 }

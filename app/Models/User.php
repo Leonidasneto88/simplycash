@@ -5,23 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Relations\HasMany; // Importante para o VS Code
-
+use Illuminate\Database\Eloquent\Relations\HasMany;
+// Remova as importações manuais se estiverem causando conflito e use o caminho completo no método
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
-
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    protected $fillable = ['name', 'email', 'password'];
+    protected $hidden = ['password', 'remember_token'];
 
     protected function casts(): array
     {
@@ -31,12 +22,14 @@ class User extends Authenticatable
         ];
     }
 
-    /**
-     * Relacionamento: Um usuário possui muitas transações.
-     * Definir o retorno como HasMany ajuda o VS Code a entender o método.
-     */
     public function transactions(): HasMany
     {
-        return $this->hasMany(Transaction::class);
+        return $this->hasMany(\App\Models\Transaction::class);
+    }
+
+    public function categories(): HasMany
+    {
+        // Usar o caminho completo aqui ajuda o VS Code a indexar
+        return $this->hasMany(\App\Models\Category::class);
     }
 }

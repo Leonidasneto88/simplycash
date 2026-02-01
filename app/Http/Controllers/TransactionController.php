@@ -3,46 +3,81 @@
 namespace App\Http\Controllers;
 
 use App\Models\Transaction;
-use App\Models\User;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Auth; // <-- ESSA LINHA É FUNDAMENTAL
+use Illuminate\Support\Facades\Auth;
 
 class TransactionController extends Controller
 {
-    /**
-     * Salva uma nova transação no banco de dados.
-     */
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'description' => 'required|string|max:255',
-            'amount'      => 'required|numeric',
-            'type'        => 'required|in:income,expense',
-            'category'    => 'required|string',
-            'date'        => 'required|date',
+            'description'   => 'required|string|max:255',
+            'amount'        => 'required|numeric',
+            'type'          => 'required|in:income,expense',
+            'category_id'   => 'nullable|exists:categories,id',
+            'category_name' => 'nullable|string|max:255',
+            'date'          => 'required|date',
         ]);
 
-        /** @var User $user */
+        /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        $user->transactions()->create($request->all());
+        $categoryId = $request->category_id;
 
-        return redirect()->route('dashboard')->with('success', 'Transação adicionada com sucesso!');
+        if (!$categoryId && $request->filled('category_name')) {
+            $category = $user->categories()->firstOrCreate(
+                ['name' => ucfirst(strtolower($request->category_name))],
+                ['color' => '#10b981']
+            );
+            $categoryId = $category->id;
+        }
+
+        $user->transactions()->create([
+            'category_id' => $categoryId,
+            'description' => $request->description,
+            'amount'      => $request->amount,
+            'type'        => $request->type,
+            'date'        => $request->date,
+        ]);
+
+        return redirect()->route('dashboard')->with('success', 'Lançamento processado!');
     }
 
-    /**
-     * Remove uma transação do banco de dados.
-     */
-    public function destroy(Transaction $transaction): RedirectResponse
+    public function update(Request $request, Transaction $transaction): RedirectResponse
     {
-        // Verificação de segurança: o usuário só deleta o que pertence a ele
+        // Segurança: Impede que um usuário edite a transação de outro
         if ($transaction->user_id !== Auth::id()) {
             abort(403);
         }
 
-        $transaction->delete();
+        $request->validate([
+            'description' => 'required|string|max:255',
+            'amount'      => 'required|numeric',
+            'type'        => 'required|in:income,expense',
+            'category_id' => 'required|exists:categories,id',
+            'date'        => 'required|date',
+        ]);
 
+        // Mapeamento explícito para garantir a persistência da categoria
+        $transaction->update([
+            'description' => $request->description,
+            'amount'      => $request->amount,
+            'type'        => $request->type,
+            'category_id' => $request->category_id,
+            'date'        => $request->date,
+        ]);
+
+        return redirect()->route('dashboard')->with('success', 'Lançamento atualizado com sucesso!');
+    }
+
+    public function destroy(Transaction $transaction): RedirectResponse
+    {
+        if ($transaction->user_id !== Auth::id()) {
+            abort(403);
+        }
+        $transaction->delete();
         return redirect()->route('dashboard')->with('success', 'Transação removida!');
     }
 }
