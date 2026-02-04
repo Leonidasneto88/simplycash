@@ -82,7 +82,7 @@
             
             <header class="bg-white/80 backdrop-blur-md border-b border-emerald-50 p-4 sticky top-0 z-40 hidden md:block">
                 <div class="flex justify-between items-center">
-                    <h2 class="text-emerald-900 font-bold italic pl-4">SimplyCa$h Insights</h2>
+                    <h2 class="text-emerald-900 font-bold italic pl-4">SimplyCa$h - Minhas Finanças</h2>
                     
                     <div class="flex items-center gap-4 border-l border-emerald-100 pl-4">
                         <div class="text-right">
