@@ -7,7 +7,7 @@ use App\Http\Controllers\CategoryController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect('/login');
 });
 
 // ALTERAÇÃO AQUI: Chama o DashboardController em vez de apenas a view
