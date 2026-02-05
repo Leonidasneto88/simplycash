@@ -9,10 +9,17 @@ class Category extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'name', 'color'];
+    // Atualizado para aceitar todos os campos que definimos
+    protected $fillable = ['user_id', 'name', 'color', 'icon', 'type'];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    // Adicionado: Uma categoria tem muitas transações
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
     }
 }

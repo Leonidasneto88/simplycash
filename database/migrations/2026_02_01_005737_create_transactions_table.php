@@ -13,16 +13,17 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId ('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            // Substituímos a string 'category' pela chave estrangeira real
+            $table->foreignId('category_id')->constrained()->onDelete('cascade'); 
             $table->string('description');
-            $table->decimal('amount',10,2);
-            $table->enum('type', ['income','expense']);
-            $table->string('category')->default('Geral');
-            $table->date('date')->nullable();
+            $table->decimal('amount', 10, 2);
+            $table->enum('type', ['income', 'expense']);
+            $table->date('date');
             $table->timestamps();
         });
     }
-
+    
     /**
      * Reverse the migrations.
      */

@@ -13,34 +13,17 @@ class TransactionController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'description'   => 'required|string|max:255',
-            'amount'        => 'required|numeric',
-            'type'          => 'required|in:income,expense',
-            'category_id'   => 'nullable|exists:categories,id',
-            'category_name' => 'nullable|string|max:255',
-            'date'          => 'required|date',
+            'description' => 'required|string|max:255',
+            'amount'      => 'required|numeric',
+            'type'        => 'required|in:income,expense',
+            'category_id' => 'required|exists:categories,id', // Agora é obrigatório
+            'date'        => 'required|date',
         ]);
 
         /** @var \App\Models\User $user */
         $user = Auth::user();
-
-        $categoryId = $request->category_id;
-
-        if (!$categoryId && $request->filled('category_name')) {
-            $category = $user->categories()->firstOrCreate(
-                ['name' => ucfirst(strtolower($request->category_name))],
-                ['color' => '#10b981']
-            );
-            $categoryId = $category->id;
-        }
-
-        $user->transactions()->create([
-            'category_id' => $categoryId,
-            'description' => $request->description,
-            'amount'      => $request->amount,
-            'type'        => $request->type,
-            'date'        => $request->date,
-        ]);
+        
+        $user->transactions()->create($request->all());
 
         return redirect()->route('dashboard')->with('success', 'Lançamento processado!');
     }

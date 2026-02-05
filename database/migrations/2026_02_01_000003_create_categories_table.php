@@ -12,12 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('categories', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('user_id')->constrained()->onDelete('cascade'); // A categoria pertence a um usuário
-        $table->string('name');
-        $table->string('color')->default('#10b981'); // Cor para o gráfico de pizza
-        $table->string('icon')->nullable(); // Ícone para o menu
-        $table->timestamps();
+            $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('name');
+            $table->string('type')->default('expense'); // Adicionado: 'income' ou 'expense'
+            $table->string('color')->default('#10b981'); 
+            $table->string('icon')->default('tag'); // Valor padrão para evitar erros visual
+            $table->timestamps();
         });
     }
 

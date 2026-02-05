@@ -43,6 +43,24 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+
+        $defaultCategories = [
+            ['name' => 'Salário', 'type' => 'income', 'icon' => 'wallet', 'color' => '#10b981'],
+            ['name' => 'Investimentos', 'type' => 'income', 'icon' => 'trending-up', 'color' => '#3b82f6'],
+            ['name' => 'Alimentação', 'type' => 'expense', 'icon' => 'utensils', 'color' => '#ef4444'],
+            ['name' => 'Moradia', 'type' => 'expense', 'icon' => 'home', 'color' => '#f59e0b'],
+            ['name' => 'Lazer', 'type' => 'expense', 'icon' => 'smile', 'color' => '#8b5cf6'],
+        ];
+
+foreach ($defaultCategories as $cat) {
+    $user->categories()->create($cat);
+}
+
         Auth::login($user);
 
         return redirect(route('dashboard', absolute: false));

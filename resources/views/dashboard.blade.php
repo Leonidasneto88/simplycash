@@ -145,14 +145,14 @@
                     @csrf
                     <input type="hidden" name="_method" id="formMethod" value="POST">
                     <div class="space-y-5">
-                        <div class="flex p-1 bg-emerald-50 rounded-2xl">
-                            <label class="flex-1 text-center py-2.5 rounded-xl cursor-pointer transition-all has-[:checked]:bg-white has-[:checked]:text-emerald-700">
+                        <div class="flex p-1 bg-gray-100 rounded-2xl border-2 border-emerald-50/50">
+                            <label class="flex-1 text-center py-3 rounded-xl cursor-pointer transition-all duration-300 has-[:checked]:bg-emerald-500 has-[:checked]:text-white text-gray-400">
                                 <input type="radio" name="type" value="income" id="radioIncome" class="hidden">
-                                <span class="font-bold text-[10px] tracking-widest uppercase">Ganho</span>
+                                <span class="font-black text-[10px] tracking-widest uppercase">Ganho</span>
                             </label>
-                            <label class="flex-1 text-center py-2.5 rounded-xl cursor-pointer transition-all has-[:checked]:bg-emerald-600 has-[:checked]:text-white">
+                            <label class="flex-1 text-center py-3 rounded-xl cursor-pointer transition-all duration-300 has-[:checked]:bg-red-600 has-[:checked]:text-white text-gray-400">
                                 <input type="radio" name="type" value="expense" id="radioExpense" class="hidden" checked>
-                                <span class="font-bold text-[10px] tracking-widest uppercase">Gasto</span>
+                                <span class="font-black text-[10px] tracking-widest uppercase">Gasto</span>
                             </label>
                         </div>
                         <div>
@@ -231,8 +231,10 @@
             }
 
             // Gráfico
+            // Localize onde o gráfico é renderizado e atualize as opções:
             const chartDataRaw = {!! json_encode($chartData) !!};
             const ctx = document.getElementById('expenseChart');
+                    
             if (ctx && chartDataRaw.length > 0) {
                 new Chart(ctx.getContext('2d'), {
                     type: 'doughnut',
@@ -240,16 +242,34 @@
                         labels: chartDataRaw.map(d => d.label),
                         datasets: [{
                             data: chartDataRaw.map(d => d.value),
-                            backgroundColor: chartDataRaw.map(d => d.color),
+                            backgroundColor: chartDataRaw.map(d => d.color), // Usa a cor que você definiu na categoria!
+                            hoverOffset: 20,
                             borderWidth: 0,
-                            spacing: 5
+                            spacing: 8
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
                         cutout: '80%',
-                        plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, font: { weight: 'bold' } } } }
+                        plugins: {
+                            legend: { 
+                                position: 'bottom', 
+                                labels: { 
+                                    usePointStyle: true, 
+                                    padding: 25,
+                                    font: { size: 12, weight: 'bold', family: 'sans-serif' } 
+                                } 
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let value = context.raw.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                                        return ` ${context.label}: ${value}`;
+                                    }
+                                }
+                            }
+                        }
                     }
                 });
             }
