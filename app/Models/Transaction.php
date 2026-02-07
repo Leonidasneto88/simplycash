@@ -12,11 +12,16 @@ class Transaction extends Model
 
     protected $fillable = [
         'user_id',
-        'category_id', // Agora o banco vai reconhecer este campo
+        'category_id', 
         'description',
         'amount',
         'type',
         'date',
+        'paid',
+    ];
+
+    protected $casts = [
+        'paid' => 'boolean', // Garante que o Laravel entenda como verdadeiro/falso
     ];
 
     /**
